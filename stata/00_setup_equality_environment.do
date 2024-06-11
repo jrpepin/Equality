@@ -1,0 +1,60 @@
+*-------------------------------------------------------------------------------
+* EQUALITY PROJECT
+* setup_equality_environment.do
+
+*-------------------------------------------------------------------------------
+version 18
+********************************************************************************
+* Setup project macros
+********************************************************************************
+global eq_base_code "`c(pwd)'" 	/// Creating macro of project working directory
+
+********************************************************************************
+* Setup personal file paths
+********************************************************************************
+* Use setup_example to set your local filepath macros. 
+* This file should be named named setup_<username>.do
+* and saved in the base project directory.
+
+// Create a home directory macro, depending on OS.
+if ("`c(os)'" == "Windows") {
+    local temp_drive : env HOMEDRIVE
+    local temp_dir : env HOMEPATH
+    global homedir "`temp_drive'`temp_dir'"
+    macro drop _temp_drive _temp_dir`
+}
+else {
+    if ("`c(os)'" == "MacOSX") | ("`c(os)'" == "Unix") {
+        global homedir : env HOME
+    }
+    else {
+        display "Unknown operating system:  `c(os)'"
+        exit
+    }
+}
+
+
+// Checks that the setup file exists and runs it.
+capture confirm file "setup_`c(username)'.do"
+if _rc==0 {
+    do setup_`c(username)'
+      }
+  else {
+    display as error "The file setup_`c(username)'.do does not exist"
+	exit
+  }
+
+// We require a logdir for the project be set.
+if ("$logdir" == "") {
+    display as error "logdir macro not set."
+    exit
+}
+
+set maxvar 5500
+
+********************************************************************************
+* Check for package dependencies 
+********************************************************************************
+* This checks for packages that the user should install prior to running the project do files.
+
+

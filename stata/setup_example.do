@@ -1,6 +1,7 @@
-* This is a personal setup file. You should create your own setup file named
+* This is an example setup file. You should create your own setup file named
 * setup_username.do that replaces the directories for project code, log files,
-* etc to the location for these files on your computer
+* etc to the location for these files on your computer. 
+* This file should be saved in the $code directory.
 
 * STANDARD PROJECT MACROS-------------------------------------------------------
 global projcode 		"$homedir/GitHub/Equality"

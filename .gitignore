@@ -1,0 +1,7 @@
+setup_joanna.do
+*.dta
+*.dat
+*.gz
+output/
+*.stswp
+*.Rhistory

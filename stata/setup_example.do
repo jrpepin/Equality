@@ -4,14 +4,14 @@
 * This file should be saved in the $code directory.
 
 * STANDARD PROJECT MACROS-------------------------------------------------------
-global projcode 		"$homedir/GitHub/Equality"
-global logdir 			"$homedir/logs/equality"
-global tempdir 			"$homedir/Dropbox/Data/temp"
+global projcode 		"$homedir\Documents\GitHub\Equality"
+global logdir 			"$homedir\logs\equality"
+global tempdir 			"$homedir\Dropbox\Data\temp"
 
 // Where you want produced tables, html or putdoc output files to go (NOT SHARED)
-global results 			"$projcode/output/results"
+global results 			"$projcode\output"
 
 * PROJECT SPECIFIC MACROS-------------------------------------------------------
-global yougov           "$homedir/Dropbox/Data/YouGov" // where the data are saved
-global code             "$projcode/stata"              // where the .do files are saved
-global datakeep         "$projcode/output/data"        // where processed data are saved
+global datadir          "$homedir\Dropbox\Data\YouGov" // where the data are saved
+global code             "$projcode\stata"              // where the .do files are saved
+global datakeep         "$projcode\output\data"        // where processed data are saved

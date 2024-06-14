@@ -65,3 +65,12 @@ if (_rc) {
         `"you can do so by clicking this link: {stata "ssc install fre":auto-install fre}"'
     exit 199
 }
+
+
+// missings: https://ideas.repec.org/c/boc/bocode/s458071.html
+capture : which missings
+if (_rc) {
+    display as error in smcl `"Please install package {it:missings} from SSC in order to run these do-files;"' _newline ///
+        `"you can do so by clicking this link: {stata "ssc install missings":auto-install missings}"'
+    exit 199
+}

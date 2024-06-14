@@ -68,6 +68,7 @@ replace  wfaNow=1 if division_of_labor >=2 & division_of_labor <=5
 ***label
 label define wfaNowlabel 0"No WFA" 1"WFA"
 label val wfaNow wfaNowlabel
+label variable wfaNow "Current work-family arrangement"
 
 *IDEAL
 cap drop ideal
@@ -79,6 +80,7 @@ replace  ideal=4 if ideal_arrangement==4  | future == 4
 ***label
 label define ideallabel 1"Self-reliance" 2"Provider" 3"Homemaker" 4"Sharing"
 label val ideal ideallabel
+label variable ideal "Ideal work-family arrangement"
 
 *IDEAL SHARING
 cap drop share
@@ -90,11 +92,39 @@ replace  share=4 if future_sharing==4 | future_sharing_arrangement == 4
 replace  share=5 if future_sharing==5 | future_sharing_arrangement == 5
 replace  share=6 if future_sharing==6 | future_sharing_arrangement == 6
 ***label
-label define ideal_sharinglabel                                              ///
+label define sharelabel                                                      ///
 	1"Equally – Home Centered" 		2"Equally – Balanced"                    ///
 	3"Equally – Career-centered" 	4"Flexible"                              ///
 	5"Family centered – Primary"    6"Family centered – Secondary"
-label val share ideal_sharinglabel
+label val share sharelabel
+label variable share "Ideal sharing arrangement"
+
+// 3 category ideal sharing
+cap drop 	share3
+gen 		share3=.
+replace 	share3=1 if share==5 | share==6
+replace 	share3=2 if share==4 
+replace 	share3=3 if share==1 | share==2 | share==3
+
+**Label
+label define share3label 1"Specialized" 2"Flexible" 3"Equally" 
+label val share3 share3label
+label variable share3 "Ideal sharing arrangement (3 categories)"
+
+// 6 category ideal arrangement
+cap drop 	ideal6
+gen      	ideal6=.
+replace		ideal6=1 if ideal  == 1
+replace		ideal6=2 if ideal  == 2
+replace		ideal6=3 if ideal  == 3
+replace		ideal6=4 if share3 == 1
+replace		ideal6=5 if share3 == 2
+replace		ideal6=6 if share3 == 3
+
+**Label
+label define ideal6label 1"Self-reliance" 2"Provider" 3"Homemaker" 4"Specialized" 5"Flexible" 6"Equally" 
+label val ideal6 ideal6label
+label variable ideal6 "Ideal arrangements (6 categories)"
 
 * Demographic Vars  ------------------------------------------------------------
 
@@ -103,6 +133,7 @@ fre birthyr
 
 cap drop age
 gen age = 2019 - birthyr
+label variable age "Age"
 
 cap drop agecat
 gen agecat=.
@@ -114,6 +145,7 @@ replace agecat=5 if age> 60
 tab age agecat
 label define agecatlabel  1"30 or less" 2"31-40" 3"41-50" 4"51-60" 5"60 or more"
 label val agecat agecatlabel
+label variable agecat "Age group"
 
 ***Non linear age
 cap drop age2
@@ -121,6 +153,7 @@ gen age2=age^2
 gen age3=age^3
 gen age4=age^4
 gen age5=age^5
+
 
 *RACE
 fre race
@@ -134,6 +167,7 @@ replace racecat=4 if race>=4
 tab racecat race
 label define racecatlabel  1"White" 2"Black" 3"Hispanic" 4"Other"
 label val racecat racecatlabel
+label variable racecat "Race-ethnicity"
 
 *MARITAL STATUS
 fre marstat
@@ -143,8 +177,9 @@ gen married=.
 replace married=1 if marstat==1 
 replace married=0 if marstat!=1 
 tab married marstat
-label define marriedlabel  1"Married" 0"Not married"
+label define marriedlabel  1 "Married" 0 "Not married"
 label val married marriedlabel
+label variable married "Marital status"
 
 *GENDER (female dummy)
 fre gender
@@ -152,18 +187,20 @@ fre gender
 cap drop female
 recode gender 1=0 2=1, gen(female)
 tab gender female, m
-label var female "Female dummy"
+label define sexlabel 0 "Men" 1 "Women"
+label values female sexlabel
+label variable female "Rs gender"
 
 *EDUCATION
 fre educ
 
 cap drop educat
-recode educ 1/2=1 3/4=2 5=3 6=4, gen(educat)
+recode educ 1/2=1 3/4=2 5/6=3, gen(educat)
 tab educ educat, m
-label var educat "Education (recode)"
-label define educatlab 	1 "No college"    2 "Less than 4-year deg"           ///
-						3 "4-year degree" 4 "Post-grad"
+label define educatlab 	1 "High school or less"    2 "Some college"          ///
+						3 "Bachelor's degree or more" 
 label values educat educatlab
+label variable educat "Education group"
 
 *FAMILY INCOME
 fre faminc_new
@@ -174,11 +211,10 @@ fre faminc_new if faminc_new<97 [aw=weight]
 cap drop incat
 recode faminc_new 1/2=1 3/4=2 5/8=3 9/16=4 97=., gen(incat)
 tab faminc_new incat, m
-label variable incat "Family income"
 label define incatlab 1 "Less than $20,000" 2 "$20,000 - $39,999"            ///
 	3 "$40,000 - $79,999" 4 "80,000 or more"
 label values incat incatlab
-
+label variable incat "Family income"
 
 * GENDER ATTITUDE SCALES -------------------------------------------------------
 ** Men and women are innately different in interests and skills.
@@ -205,6 +241,35 @@ alpha essentialism scarce menlead fathers decisions,                         ///
 *** remove time & fathers
 cap drop attitudes
 alpha essentialism scarce menlead decisions, item gen(attitudes) // alpha is .81
+label variable attitudes "Gender attitude scale"
+
+* KEEP NEW MEASURES ------------------------------------------------------------
+
+keep 	wfaNow ideal ideal6 share share3                                     ///
+		age* racecat married female educat incat                             ///
+		attitudes essentialism scarce menlead fathers decisions time         ///
+		caseid weight
+		
+		
+********************************************************************************
+* SAMPLE
+********************************************************************************
+
+count
+missings report // identify missing cases
+*** ! LATER: INPUT INCOME OR DROP VARIABLE?
+
+missings list essentialism wfaNow ideal6 // 2 obs missing (ignore incat)
+
+
+///  Sample
+cap drop    flag
+gen         flag=0
+replace     flag=1 if   ideal6!=.       & wfaNow!=.     &                    ///
+                        female!=.       & married!=.    & agecat!=.     &    ///
+                        racecat!=.      & educat!=.     & incat!=.      &    ///
+                        attitudes!=.
+
 
 * END --------------------------------------------------------------------------
 

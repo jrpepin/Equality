@@ -74,3 +74,11 @@ if (_rc) {
         `"you can do so by clicking this link: {stata "ssc install missings":auto-install missings}"'
     exit 199
 }
+
+// grc1leg: http://www.stata.com/users/vwiggins/
+capture : which grc1leg
+if (_rc) {
+    display as error in smcl `"Please install package {it:grc1leg} from SSC in order to run these do-files;"' _newline ///
+        `"you can do so by clicking this link: {stata "ssc install grc1leg":auto-install grc1leg}"'
+    exit 199
+}

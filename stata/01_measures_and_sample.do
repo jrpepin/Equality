@@ -257,7 +257,7 @@ alpha essentialism scarce menlead fathers decisions,                         ///
 *** remove time & fathers
 cap drop attitudes
 alpha essentialism scarce menlead decisions, item gen(attitudes) // alpha is .81
-label variable attitudes "Gender attitude scale"
+label variable attitudes "Gender essentialism scale"
 
 * KEEP NEW MEASURES ------------------------------------------------------------
 

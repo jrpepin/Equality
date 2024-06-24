@@ -30,9 +30,9 @@ S.D. in parentheses)                                                         ///
 export($results/table1.html, replace)              
 
 ********************************************************************************
-* Table 012
+* Table 02
 ********************************************************************************
-// later - change to AME
+// later - change tables to AMEs
 
 global IVs "i.female i.wfaNow i.married i.parent i.educat i.racecat i.incat age attitudes"
 
@@ -41,7 +41,10 @@ global IVs "i.female i.wfaNow i.married i.parent i.educat i.racecat i.incat age 
 mlogit ideal $IVs [pw=weight] , b(4) rrr
 
 margins, by(female) // Predicted Probabilities
-marginsplot, by(female) recast(bar) plotopts(barw(.8))
+
+* Figure 1?
+marginsplot, by(female) recast(bar) plotopts(barw(.8)) horizontal yscale(reverse) ///
+ylab(1 "Self-reliance" 2 "Provider" 3 "Homemaker" 4 "Sharing")
 
 margins, dydx(*) // AME
 
@@ -55,14 +58,52 @@ mlogit share3 $IVs [pw=weight] , b(3) rrr
 
 margins, by(female) // Predicted Probabilities
 marginsplot, by(female) recast(bar) plotopts(barw(.8))
-
-
+// sends wrong message -- looks like equal sharing really popular
 
 * All 6 categories at the same time
 mlogit ideal6 $IVs [pw=weight] , b(6) rrr
 
 margins, by(female) // Predicted Probabilities
-marginsplot, by(female) recast(bar) plotopts(barw(.8))
 
+* Figure 2? maybe combine with plot 1 for 1 figure?
+marginsplot, by(female) recast(bar) ///
+	plotopts(barw(.8)) horizontal yscale(reverse) ///
+	ylab(1 "Self-reliance" 2 "Provider" 3 "Homemaker" ///
+	4 "Specialized" 5 "Flexible" 6 "Equally")
 
+* Figure 2/3
+mlogit ideal6 $IVs [pw=weight] , b(6) rrr // same mlogit as before
+
+margins, at(attitudes = (1(1)5)) predict(outcome(1))
+marginsplot, ytitle("") title("Self-reliance") name(SelfReliance, replace) 
+margins, at(attitudes = (1(1)5)) predict(outcome(2))
+marginsplot, ytitle("") title("Provider") name(Provider, replace) 
+margins, at(attitudes = (1(1)5)) predict(outcome(3))
+marginsplot, ytitle("") title("Homemaker") name(Homemaker, replace) 
+margins, at(attitudes = (1(1)5)) predict(outcome(4))
+marginsplot, ytitle("") title("Specialized") name(Specialized, replace) 
+margins, at(attitudes = (1(1)5)) predict(outcome(5))
+marginsplot, ytitle("") title("Flexible") name(Flexible, replace) 
+margins, at(attitudes = (1(1)5)) predict(outcome(6))
+marginsplot, ytitle("") title("Equally") name(Equally, replace) 
+graph combine SelfReliance Provider Homemaker ///
+	Specialized Flexible Equally, ycommon name(fig3, replace)
+
+* Figure 2/3
+mlogit ideal6 $IVs [pw=weight] , b(6) rrr // same mlogit as before
+
+margins female, at(attitudes = (1(1)5)) predict(outcome(1))
+marginsplot, ytitle("") xtitle("") title("Self-reliance") name(SelfReliance, replace) 
+margins female, at(attitudes = (1(1)5)) predict(outcome(2))
+marginsplot, ytitle("") xtitle("") title("Provider") name(Provider, replace) 
+margins female, at(attitudes = (1(1)5)) predict(outcome(3))
+marginsplot, ytitle("") xtitle("") title("Homemaker") name(Homemaker, replace) 
+margins female, at(attitudes = (1(1)5)) predict(outcome(4))
+marginsplot, ytitle("") title("Specialized") name(Specialized, replace) 
+margins female, at(attitudes = (1(1)5)) predict(outcome(5))
+marginsplot, ytitle("") title("Flexible") name(Flexible, replace) 
+margins female, at(attitudes = (1(1)5)) predict(outcome(6))
+marginsplot, ytitle("") title("Equally") name(Equally, replace) 
+grc1leg SelfReliance Provider Homemaker ///
+	Specialized Flexible Equally, ycommon name(fig3, replace)
 

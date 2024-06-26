@@ -3,8 +3,15 @@
 * setup_equality_environment.do
 
 *-------------------------------------------------------------------------------
-version 18
-set varabbrev off // don't allow  variable name abbreviation 
+
+* Use setup_example.do to set your local filepath macros. 
+* This file should be named named setup_<username>.do
+* and saved in the base project directory.
+* <username> must match exactly your Windows/MacOSX username
+
+* Always open this .do file directly (don't open Stata and then open this .do 
+* file in order for Stata to automatically set the project working.
+
 ********************************************************************************
 * Setup project macros
 ********************************************************************************
@@ -13,9 +20,6 @@ global eq_base_code "`c(pwd)'" 	/// Creating macro of project working directory
 ********************************************************************************
 * Setup personal file paths
 ********************************************************************************
-* Use setup_example to set your local filepath macros. 
-* This file should be named named setup_<username>.do
-* and saved in the base project directory.
 
 // Create a home directory macro, depending on OS.
 if ("`c(os)'" == "Windows") {
@@ -82,3 +86,9 @@ if (_rc) {
         `"you can do so by clicking this link: {stata "ssc install grc1leg":auto-install grc1leg}"'
     exit 199
 }
+
+********************************************************************************
+* .do file settings 
+********************************************************************************
+version 18
+set varabbrev off // don't allow  variable name abbreviation 

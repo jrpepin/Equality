@@ -47,7 +47,6 @@ marginsplot, by(female) recast(bar) plotopts(barw(.8)) horizontal yscale(reverse
 ylab(1 "Self-reliance" 2 "Provider" 3 "Homemaker" 4 "Sharing") ///
 ytitle("") xtitle("") byopt(title ("Four Work-family arrangements")) name(WFA4, replace)
  
-
 margins, dydx(*) // AME
 
 margins, dydx(female) // AME
@@ -62,8 +61,10 @@ margins, by(female) // Predicted Probabilities
 marginsplot, by(female) recast(bar) plotopts(barw(.8))
 // sends wrong message -- looks like equal sharing really popular
 
+********************************************************************************
 * All 6 categories at the same time
-mlogit ideal6 $IVs [pw=weight] , b(1) rrr
+********************************************************************************
+mlogit ideal6 $IVs [pw=weight] , b(6) rrr
 
 margins, by(female) // Predicted Probabilities
 

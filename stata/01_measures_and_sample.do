@@ -27,9 +27,8 @@ use "$datadir/egalitarian-dataset.dta"
 * DVs  -------------------------------------------------------------------------
 /* 
 * division_of_labor
-Which of the following options best describes how would you have liked to 
-structure your work and family life? Please choose your ideal situation, 
-regardless of whether this matches what actually happened.
+In your life, how have you already planned around work and family? 
+Please choose the answer option that best fits your life.
 
 // not yet made plans (ideal)
 If respondent chooses option #1 for the division_of_labor question:
@@ -138,74 +137,6 @@ label define sexlabel 0 "Men" 1 "Women"
 label values female sexlabel
 label variable female "Rs gender"
 
-
-*MARITAL STATUS
-fre marstat
-
-cap drop married
-gen married=.
-replace married=1 if marstat==1 
-replace married=0 if marstat!=1 
-tab married marstat
-label define marriedlabel  1 "Married" 0 "Not married"
-label val married marriedlabel
-label variable married "Marital status"
-
-
-*PARENTING
-fre child18
-
-cap drop parent
-gen parent=.
-replace parent=1 if child18==1
-replace parent=0 if child18==2
-
-label define parentlabel 0 "No HH child" 1 "HH child"
-label val parent parentlabel
-label variable parent "Children under age 18 in household"
-
-
-*EDUCATION
-fre educ
-
-cap drop educat
-recode educ 1/2=1 3/4=2 5/6=3, gen(educat)
-tab educ educat, m
-label define educatlab 	1 "High school or less"    2 "Some college"          ///
-						3 "Bachelor's degree or more" 
-label values educat educatlab
-label variable educat "Education group"
-
-
-*RACE
-fre race
-
-cap drop racecat
-gen racecat=.
-replace racecat=1 if race==1 
-replace racecat=2 if race==2 
-replace racecat=3 if race==3 
-replace racecat=4 if race>=4
-tab racecat race
-label define racecatlabel  1"White" 2"Black" 3"Hispanic" 4"Other"
-label val racecat racecatlabel
-label variable racecat "Race-ethnicity"
-
-*FAMILY INCOME
-fre faminc_new
-
-fre faminc_new
-fre faminc_new if faminc_new<97 [aw=weight]
-
-cap drop incat
-recode faminc_new 1/2=1 3/4=2 5/8=3 9/16=4 97=., gen(incat)
-tab faminc_new incat, m
-label define incatlab 1 "Less than $20,000" 2 "$20,000 - $39,999"            ///
-	3 "$40,000 - $79,999" 4 "80,000 or more"
-label values incat incatlab
-label variable incat "Family income"
-
-
 *AGE
 fre birthyr
 
@@ -213,6 +144,7 @@ cap drop age
 gen age = 2019 - birthyr
 label variable age "Age"
 
+/* NOT USED BUT KEEPING CODE IN CASE CHANGE MIND
 cap drop agecat
 gen agecat=.
 replace agecat=1 if age<=30
@@ -231,6 +163,73 @@ gen age2=age^2
 gen age3=age^3
 gen age4=age^4
 gen age5=age^5
+*/
+
+*RACE
+fre race
+
+cap drop racecat
+gen racecat=.
+replace racecat=1 if race==1 
+replace racecat=2 if race==2 
+replace racecat=3 if race==3 
+replace racecat=4 if race>=4
+tab racecat race
+label define racecatlabel  1 "White" 2 "Black" 3 "Hispanic" 4 "Other"
+label val racecat racecatlabel
+label variable racecat "Race-ethnicity"
+
+*EDUCATION
+fre educ
+
+cap drop educat
+recode educ 1/2=1 3/4=2 5/6=3, gen(educat)
+tab educ educat, m
+label define educatlab 	1 "High school or less"    2 "Some college"          ///
+						3 "Bachelor's degree or more" 
+label values educat educatlab
+label variable educat "Education group"
+
+*MARITAL STATUS
+fre marstat
+
+cap drop married
+gen married=.
+replace married=1 if marstat==1 | marstat == 6
+replace married=0 if marstat!=1 & marstat != 6
+tab married marstat
+label define marriedlabel  1 "Married" 0 "Not married"
+label val married marriedlabel
+label variable married "Marital status"
+
+*PARENTING
+fre child18
+
+cap drop parent
+gen parent=.
+replace parent=1 if child18==1
+replace parent=0 if child18==2
+
+label define parentlabel 0 "No HH child" 1 "HH child"
+label val parent parentlabel
+label variable parent "Children under age 18 in household"
+
+/* NOT USING BECAUSE OF MISSING DATA...
+*FAMILY INCOME
+fre faminc_new
+
+fre faminc_new
+fre faminc_new if faminc_new<97 [aw=weight]
+
+cap drop incat
+recode faminc_new 1/2=1 3/4=2 5/8=3 9/16=4 97=., gen(incat)
+tab faminc_new incat, m
+label define incatlab 1 "Less than $20,000" 2 "$20,000 - $39,999"            ///
+	3 "$40,000 - $79,999" 4 "80,000 or more"
+label values incat incatlab
+label variable incat "Family income"
+*/
+
 
 * GENDER ATTITUDE SCALES -------------------------------------------------------
 ** Men and women are innately different in interests and skills.
@@ -258,6 +257,7 @@ alpha essentialism scarce menlead fathers decisions,                         ///
 cap drop attitudes
 alpha essentialism scarce menlead decisions, item gen(attitudes) // alpha is .81
 label variable attitudes "Gender essentialism"
+
 
 * KEEP NEW MEASURES ------------------------------------------------------------
 

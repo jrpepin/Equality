@@ -5,3 +5,4 @@ setup_joanna.do
 output/
 *.stswp
 *.Rhistory
+.Rproj.user

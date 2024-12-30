@@ -255,14 +255,14 @@ alpha essentialism scarce menlead fathers decisions,                         ///
 	
 *** remove time & fathers
 cap drop attitudes
-alpha essentialism scarce menlead decisions, item gen(attitudes) // alpha is .81
+alpha essentialism scarce menlead decisions, item gen(attitudes) casewise // alpha is .81
 label variable attitudes "Gender essentialism"
 
 
 * KEEP NEW MEASURES ------------------------------------------------------------
 
 keep 	wfaNow ideal ideal6 share share3                                     ///
-		female married parent educat racecat incat age*                      ///
+		female married parent educat racecat age*                            ///
 		attitudes essentialism scarce menlead fathers decisions time         ///
 		caseid weight
 		
@@ -283,8 +283,8 @@ cap drop    flag
 gen         flag=0
 replace     flag=1 if   ideal6!=.       & wfaNow!=.     &                    ///
                         female!=.       & married!=.    & parent!=.     &    ///
-                        educat!=.       & racecat!=.    & incat!=.      &    ///
-                        agecat!=.       & attitudes!=.
+                        educat!=.       & racecat!=.                    &    ///
+                        age!=.          & attitudes!=.
 
 
 * END --------------------------------------------------------------------------

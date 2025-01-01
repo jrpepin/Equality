@@ -15,7 +15,7 @@ svyset caseid [pweight=weight], vce(linearized) singleunit(missing)
 ********************************************************************************
 * Table 01 
 ********************************************************************************
-global catvars "i.ideal i.wfaNow i.married i.parent i.educat i.racecat i.incat" 
+global catvars "i.married i.parent i.educat i.racecat" 
 global numvars "age attitudes" 
 
 
@@ -34,20 +34,21 @@ export($results/table1.html, replace)
 ********************************************************************************
 // later - change tables to AMEs
 
-global IVs "i.female i.wfaNow i.married i.parent i.educat i.racecat i.incat age attitudes"
+global IVs "i.female i.married i.parent i.educat i.racecat age attitudes"
 
 
 * Original 4 categories
+mlogit ideal $IVs [pw=weight] , b(1)
 mlogit ideal $IVs [pw=weight] , b(1) rrr
 
-margins, by(female) // Predicted Probabilities
+margins, dydx(*) by(female)            // AMEs
+margins, by(female)                    // Predicted Probabilities
 
 * WFA4 plot
 marginsplot, by(female) recast(bar) plotopts(barw(.8)) horizontal yscale(reverse) ///
 ylab(1 "Self-reliance" 2 "Provider" 3 "Homemaker" 4 "Sharing") ///
 ytitle("") xtitle("") byopt(title ("Four Work-family arrangements")) name(WFA4, replace)
  
-margins, dydx(*) // AME
 
 margins, dydx(female) // AME
 marginsplot, recast(bar) plotopts(barw(.8)) ///
@@ -64,7 +65,8 @@ marginsplot, by(female) recast(bar) plotopts(barw(.8))
 ********************************************************************************
 * All 6 categories at the same time
 ********************************************************************************
-mlogit ideal6 $IVs [pw=weight] , b(6) rrr
+mlogit ideal6 $IVs [pw=weight] , b(1)
+mlogit ideal6 $IVs [pw=weight] , b(1) rrr
 
 margins, by(female) // Predicted Probabilities
 

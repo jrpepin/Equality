@@ -1,0 +1,178 @@
+#-------------------------------------------------------------------------------
+# EVEN SHARING PROJECT
+# ES_02_tables and figures.R
+# Inés Martínez Echagüe & Joanna R. Pepin
+#-------------------------------------------------------------------------------
+
+
+# Table 01 Descriptive Statistics of Respondent Characteristics ----------------
+
+tabT01 <- data_svy %>%
+  select("female", "married", "parent", 
+         "educat", "racecat", "age", "attitudes") %>%
+  tbl_svysummary(
+    by    = female, 
+    label = list(married    ~ "Married",
+                 parent     ~ "Children under age 18 in household",
+                 educat     ~ "Education group",
+                 racecat    ~ "Respondent race/ethnicity",
+                 age        ~ "Respondent age",
+                 attitudes  ~ "Gender essentialism beliefs"),
+    type  = list(married    ~ "dichotomous",
+                 parent     ~ "dichotomous"),
+    value = list(married    = "Married",
+                 parent     = "HH child"),
+    statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{p}"),
+    digits = ~ c(2))  %>%
+  add_overall() %>%
+  modify_header(
+    label = '**Variable**',
+    stat_0 = '**N = 998**') %>%
+  as_flex_table() %>%
+  add_footer_lines("Source: 2018 YouGov original survey.")
+
+tabT01 # show table
+
+## https://mran.microsoft.com/snapshot/2017-12-11/web/packages/officer/vignettes/word.html
+read_docx() %>% 
+  body_add_par("Table 01. Weighted descriptive statistics of the analytic sample") %>% 
+  body_add_flextable(value = tabT01) %>% 
+  print(target = file.path(outDir, "ES_tableT01.docx"))
+
+
+
+# Table 02 ---------------------------------------------------------------------
+
+## Set reference levels
+data$ideal <- relevel(data$ideal, ref = "Self-reliance")
+
+## Original 4 categories
+m1 <- multinom(ideal ~ female + married + parent + educat + racecat + age + attitudes, data, weights = weight)
+
+## 6 categories at same time
+m2 <- multinom(ideal6 ~ female + married + parent + educat + racecat + age + attitudes, data, weights = weight)
+
+### AMEs
+ame_m1 <- avg_slopes(m1, by = "female")
+ame_m2 <- avg_slopes(m2, by = "female")
+
+## Create list for 2 panels
+panels <- list(
+  "4 categories" = ame_m1,
+  "6 categories" = ame_m2)
+
+## Create pretty labels
+coef_map <- c(
+  "per.1"    = "High Stakes",
+  "per.2"    = "Low Stakes")
+
+## Produce Table 02
+modelsummary(
+  panels,
+#  coef_map = coef_map,
+  shape = group + term + contrast ~ model + female,
+  gof_map = NA,
+  estimate = "{estimate} ({std.error}) {stars} ",
+  statistic = NULL,
+  stars = c("*" =.05, "**" = .01, "***" = .001),
+  fmt = fmt_decimal(digits = 3, pdigits = 3),
+  #  add_rows = rows,
+  output = "huxtable") 
+
+# %>%
+#   insert_row(c("Man Higher Earner",   " ", " ", " "), after = 1)  %>%
+#   insert_row(c("Woman Higher Earner", " ", " ", " "), after = 6)  %>%
+#   insert_row(c("Equal Earners",       " ", " ", " "), after = 11) %>%
+#   insert_row(c('Significant difference, high vs. low stakes?', 
+#                'Yes', 'Yes', 'No'),                   after = 6)  %>%
+#   insert_row(c('Significant difference, high vs. low stakes?', 
+#                'Yes', 'No', 'Yes'),                  after = 12)  %>%
+#   insert_row(c('Significant difference, high vs. low stakes?', 
+#                'No', 'No', 'No'),                    after = 18)  %>%
+#   set_top_border(row = c(8, 14), col = everywhere)                %>%
+#   set_bottom_border(row = c(1,8,14), col = everywhere)            %>%
+#   set_align(row = c(3, 5, 9, 11, 15, 17), 1, "center")            %>%
+#   huxtable::as_flextable()                                        %>%
+#   flextable::footnote(i = 11, j = 1, 
+#                       value = as_paragraph(c("Statistically significant gender difference (p < .05)."))) %>%
+#   add_footer_lines("Notes: N=7,956 person-decisions. 3,970 men and 3,986 women. Results calculated from respondent-fixed effects linear probability models. Independent models applied by relative income and respondent gender. Standard errors in parentheses.") %>%
+#   set_table_properties(layout = "autofit") 
+# 
+# tab02
+
+# Figure 01 --------------------------------------------------------------------
+
+## Create predicted probabilities date sets
+pp1M <- avg_predictions(m1, by = c("female"))
+pp1M$model <- "4 work-family arrangements"
+
+## Create predicted probabilities date sets
+pp2M <- avg_predictions(m2, by = c("female"))
+pp2M$model <- "Subset of\n'sharing' arrangement"
+
+## Combine and clean the data sets
+data_fig1 <- do.call("rbind", list(pp1M, pp2M))
+
+data_fig1 <- data_fig1 %>%
+  mutate(
+    even = fct_case_when(
+      group == "Self-reliance" | 
+        group == "Provider"    | 
+        group == "Homemaker"   ~ "uneven",
+      group == "Sharing"       ~ "even",
+      group == "Specialized"   |
+        group == "Flexible"    |
+        group == "Equally"     ~ "sub-even"))
+
+## Create fig
+fig1 <- data_fig1 %>%
+  filter(
+    model == "4 work-family arrangements" |
+      model == "Subset of\n'sharing' arrangement" & even == "sub-even") %>%
+  ggplot(aes(y = estimate, x = group, fill = fct_rev(female), ymin=conf.low, ymax=conf.high)) +
+  geom_col(width = 0.6, position = position_dodge(0.7), colour="black") +
+  geom_errorbar(width = 0.2, position = position_dodge(0.7), color="#707070") +
+  geom_text(position = position_dodge(width = .7),
+            hjust = -.8,
+            size = 10/.pt,
+            aes(label=sprintf("%1.0f%%", estimate*100))) +
+  facet_grid(cols = vars(model),
+             switch = "y",
+             scales="free",
+             space = "free") +
+  theme_minimal() +
+  theme(
+    text                = element_text(size=12, family = "serif"),
+    axis.text           = element_text(size=12, family = "serif"), 
+    legend.text         = element_text(size=12, family = "serif"),
+    legend.position     = "bottom",
+    panel.grid.major.y  = element_blank(),
+    strip.text          = element_text(face = "bold", size=12, family = "serif"),
+    strip.placement     = "outside",               # Places the strip text on the outside 
+    strip.text.y.left   = element_text(angle = 0),
+    axis.text.x         = element_blank(),  #remove x axis labels
+    axis.text.y         = element_text(colour = "black", face = "bold"),
+    axis.ticks.y        = element_blank(),  #remove y axis ticks
+    plot.subtitle       = element_text(face = "italic", color = "#707070"),
+    plot.caption        = element_text(face = "italic", color = "#707070"),
+    plot.title          = ggtext::element_markdown(),
+    plot.title.position = "plot") +
+  scale_y_continuous(labels=scales::percent, limits = c(0, .75)) +
+  scale_x_discrete(limits=rev) +
+  scale_fill_manual(values = c("black", "white")) +
+  coord_flip() +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  labs(
+    #   title    = "XXX",
+    #   subtitle = "YYY",
+    #   caption  = "Note: ZZZ",
+    fill     = NULL,
+    x        = NULL, 
+    y        = NULL) 
+
+fig1
+
+## save Figure 1
+agg_tiff(filename = file.path(here(outDir, figDir), "fig1.tif"), width=6.5, height=5, units="in", res = 800, scaling = 1)
+plot(fig1)
+invisible(dev.off())

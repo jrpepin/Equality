@@ -76,14 +76,14 @@ data <- data %>%
         division_of_labor <= 5                  ~ "WFA",
       TRUE                                      ~  NA_character_),
     # Ideal work-family arrangement
-    ideal = case_when(
+    ideal = fct_case_when(
       ideal_arrangement==1  | future == 1       ~ "Self-reliance",
       ideal_arrangement==2  | future == 2       ~ "Provider",
       ideal_arrangement==3  | future == 3       ~ "Homemaker",
       ideal_arrangement==4  | future == 4       ~ "Sharing",
       TRUE                                      ~  NA_character_),
     # Ideal sharing arrangement
-    share = case_when(
+    share = fct_case_when(
       future_sharing==1 | 
         future_sharing_arrangement == 1         ~ "Equally\nHome Centered",
       future_sharing==2 | 
@@ -107,7 +107,7 @@ data <- data %>%
         share=="Equally\nCareer-centered"       ~ "Equally",
       TRUE                                      ~  NA_character_),
     # Ideal arrangements (6 categories)
-    ideal6 = case_when(
+    ideal6 = fct_case_when(
       ideal  == "Self-reliance"                 ~ "Self-reliance",
       ideal  == "Provider"                      ~ "Provider",
       ideal  == "Homemaker"                     ~ "Homemaker",

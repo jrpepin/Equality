@@ -23,6 +23,7 @@ pacman::p_load(
   sjPlot,          # generate a codebook
   MESS,            # round percentages
   MASS,            # ologits
+  nnet,            # multinomials
   marginaleffects, # average marginal effects
   ggeffects,       # predicted probabilities
   effects,         # required for ggeffects
@@ -36,6 +37,7 @@ pacman::p_load(
   gt,              # tables with gt formatting
   pandoc,          # word docs from modelsummary
   weights,         # drop leading 0 in geom_text labels
+  ragg,            # output figures without blur
   conflicted
 )
 

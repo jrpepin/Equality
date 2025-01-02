@@ -173,6 +173,52 @@ fig1 <- data_fig1 %>%
 fig1
 
 ## save Figure 1
-agg_tiff(filename = file.path(here(outDir, figDir), "fig1.tif"), width=6.5, height=5, units="in", res = 800, scaling = 1)
+agg_tiff(filename = file.path(here(outDir, figDir), "fig1.tif"), 
+         width=6.5, height=5, units="in", res = 800, scaling = 1)
 plot(fig1)
 invisible(dev.off())
+
+
+# Figure 02 --------------------------------------------------------------------
+
+## Create predicted probabilities date sets
+data_fig2 <- avg_predictions(m2, variables = list(attitudes = c(1,2,3,4,5)))
+
+fig2 <- data_fig2 %>%
+  ggplot(aes(x = attitudes, y = estimate, ymin=conf.low, ymax=conf.high)) +
+  geom_line() +
+  geom_errorbar(width = 0.2, color="grey40") +
+  geom_point() +
+  facet_wrap("group", ncol = 3) +
+  theme_minimal() +
+  scale_x_reverse() +
+  theme(
+    text                = element_text(size=12, family = "serif"),
+    axis.text           = element_text(size=12, family = "serif"), 
+    legend.text         = element_text(size=12, family = "serif"),
+    panel.grid.minor    = element_blank(),
+    panel.grid.major.x  = element_blank(),
+    axis.line           = element_line(), 
+    strip.text          = element_text(face = "bold",    size=12, family = "serif"),
+    axis.text.y         = element_text(colour = "black", size=12, family = "serif"),
+    axis.text.x         = element_text(colour = "black", size=12, family = "serif"),
+    axis.ticks.y        = element_blank(),  #remove y axis ticks
+    plot.subtitle       = element_text(face = "italic", color = "#707070"),
+    plot.caption        = element_text(face = "italic", color = "#707070"),
+    plot.title          = ggtext::element_markdown(),
+    plot.title.position = "plot") +
+  labs(
+    #   title    = "XXX",
+    #   subtitle = "YYY",
+    #   caption  = "Note: ZZZ",
+    x        = "Gender essentialism", 
+    y        = NULL) 
+
+fig2
+
+## save Figure 2
+agg_tiff(filename = file.path(here(outDir, figDir), "fig2.tif"), 
+         width=6.5, height=5, units="in", res = 800, scaling = 1)
+plot(fig2)
+invisible(dev.off())
+

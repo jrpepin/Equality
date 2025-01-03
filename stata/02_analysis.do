@@ -38,7 +38,7 @@ global IVs "i.female i.married i.parent i.educat i.racecat age attitudes"
 
 
 * Original 4 categories
-mlogit ideal $IVs [pw=weight] , b(1)
+mlogit ideal $IVs [pw=weight] , b(1)   // MODEL 01
 mlogit ideal $IVs [pw=weight] , b(1) rrr
 
 margins, dydx(*) by(female)            // AMEs
@@ -65,7 +65,7 @@ marginsplot, by(female) recast(bar) plotopts(barw(.8))
 ********************************************************************************
 * All 6 categories at the same time
 ********************************************************************************
-mlogit ideal6 $IVs [pw=weight] , b(1)
+mlogit ideal6 $IVs [pw=weight] , b(1)      // MODEL 02
 mlogit ideal6 $IVs [pw=weight] , b(1) rrr
 
 margins, by(female) // Predicted Probabilities

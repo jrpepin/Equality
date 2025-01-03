@@ -103,15 +103,21 @@ modelsummary(
 # Figure 01 --------------------------------------------------------------------
 
 ## Create predicted probabilities date sets
-pp1M <- avg_predictions(m1, by = c("female"))
-pp1M$model <- "4 work-family arrangements"
+pp1        <- avg_predictions(m1)
+pp1G       <- avg_predictions(m1, by = c("female"))
+pp1$model  <- "4 work-family arrangements"
+pp1G$model <- "4 work-family arrangements"
+pp1$female <- "All"
 
 ## Create predicted probabilities date sets
-pp2M <- avg_predictions(m2, by = c("female"))
-pp2M$model <- "Subset of\n'sharing' arrangement"
+pp2        <- avg_predictions(m2)
+pp2G       <- avg_predictions(m2, by = c("female"))
+pp2$model  <- "Subset of\n'sharing' arrangement"
+pp2G$model <- "Subset of\n'sharing' arrangement"
+pp2$female <- "All"
 
 ## Combine and clean the data sets
-data_fig1 <- do.call("rbind", list(pp1M, pp2M))
+data_fig1 <- do.call("rbind", list(pp1, pp1G, pp2, pp2G))
 
 data_fig1 <- data_fig1 %>%
   mutate(
@@ -122,7 +128,11 @@ data_fig1 <- data_fig1 %>%
       group == "Sharing"       ~ "even",
       group == "Specialized"   |
         group == "Flexible"    |
-        group == "Equally"     ~ "sub-even"))
+        group == "Equally"     ~ "sub-even"),
+    female = fct_case_when(
+      female == "All" ~ "All",
+      female == "Men" ~ "Men",
+      female == "Women" ~ "Women"))
 
 ## Create fig
 fig1 <- data_fig1 %>%
@@ -159,7 +169,7 @@ fig1 <- data_fig1 %>%
     plot.title.position = "plot") +
   scale_y_continuous(labels=scales::percent, limits = c(0, .75)) +
   scale_x_discrete(limits=rev) +
-  scale_fill_manual(values = c("black", "white")) +
+  scale_fill_manual(values = c("white", "grey70", "black")) +
   coord_flip() +
   guides(fill = guide_legend(reverse = TRUE)) +
   labs(
@@ -174,7 +184,7 @@ fig1
 
 ## save Figure 1
 agg_tiff(filename = file.path(here(outDir, figDir), "fig1.tif"), 
-         width=6.5, height=5, units="in", res = 800, scaling = 1)
+         width=6.5, height=6.5, units="in", res = 800, scaling = 1)
 plot(fig1)
 invisible(dev.off())
 
@@ -220,5 +230,54 @@ fig2
 agg_tiff(filename = file.path(here(outDir, figDir), "fig2.tif"), 
          width=6.5, height=5, units="in", res = 800, scaling = 1)
 plot(fig2)
+invisible(dev.off())
+
+# Figure 03 --------------------------------------------------------------------
+
+## Create predicted probabilities date sets (for reference)
+data_fig3_pp <- avg_predictions(m2, by = c("female", "attitudes"), 
+                                variables = list(attitudes = c(1,2,3,4,5)))
+
+## Create AMEs
+data_fig3    <- avg_slopes(m2, by = c("attitudes"), variables = "female", 
+                           newdata = datagrid(attitudes = c(1,2,3,4,5), 
+                                              grid_type = "counterfactual"))
+
+fig3 <- data_fig3 %>%
+  ggplot(aes(y = estimate, x = attitudes, ymin=conf.low, ymax=conf.high)) +
+  geom_col(width = 0.6, position = position_dodge(0.7), colour="black") +
+  geom_errorbar(width = 0.2, position = position_dodge(0.7), color="grey70") +
+  geom_hline(yintercept=0, size=1) +
+  facet_wrap("group", ncol = 3) +
+  theme_minimal() +
+  theme(
+    text                = element_text(size=12, family = "serif"),
+    axis.text           = element_text(size=12, family = "serif"), 
+    legend.text         = element_text(size=12, family = "serif"),
+    panel.grid.minor    = element_blank(),
+    panel.grid.major.x  = element_blank(),
+    axis.line           = element_line(), 
+    strip.text          = element_text(face = "bold",    size=12, family = "serif"),
+    axis.text.y         = element_text(colour = "black", size=12, family = "serif"),
+    axis.text.x         = element_text(colour = "black", size=12, family = "serif"),
+    axis.ticks.y        = element_blank(),  #remove y axis ticks
+    plot.subtitle       = element_text(face = "italic", color = "#707070"),
+    plot.caption        = element_text(face = "italic", color = "#707070"),
+    plot.title          = ggtext::element_markdown(),
+    plot.title.position = "plot") +
+  scale_x_reverse() +
+  labs(
+    #   title    = "XXX",
+    #   subtitle = "YYY",
+    #   caption  = "Note: ZZZ",
+    x        = "Gender essentialism", 
+    y        = NULL) 
+
+fig3
+
+## save Figure 3
+agg_tiff(filename = file.path(here(outDir, figDir), "fig3.tif"), 
+         width=6.5, height=5, units="in", res = 800, scaling = 1)
+plot(fig3)
 invisible(dev.off())
 

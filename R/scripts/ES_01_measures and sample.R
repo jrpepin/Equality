@@ -39,21 +39,6 @@ data <- data %>%
       gender   == 1                            ~ "Men",
       gender   == 2                            ~ "Women", 
       TRUE                                     ~  NA_character_),
-    # Age
-    age = 2019 - birthyr,
-    # Race
-    racecat = fct_case_when(
-      race   == 1                              ~ "White",
-      race   == 2                              ~ "Black", 
-      race   == 3                              ~ "Hispanic",
-      race   >= 4                              ~ "Other", 
-      TRUE                                     ~  NA_character_),
-    # Education group
-    educat = fct_case_when(
-      educ   == 1 | educ == 2                  ~ "High school\nor less",
-      educ   == 3 | educ == 4                  ~ "Some college", 
-      educ   == 5 | educ == 6                  ~ "Bachelor's degree\nor more",
-      TRUE                                     ~  NA_character_),
     # Marital status
     married = fct_case_when(
       marstat!=1 & marstat != 6                ~ "Not married", 
@@ -61,9 +46,24 @@ data <- data %>%
       TRUE                                     ~  NA_character_),
     # Children under age 18 in household
     parent = fct_case_when(
-      child18==1                               ~ "No HH child",
-      child18==2                               ~ "HH child",
-      TRUE                                     ~  NA_character_))   
+      child18==2                               ~ "No HH child",
+      child18==1                               ~ "HH child",
+      TRUE                                     ~  NA_character_),
+    # Education group
+    educat = fct_case_when(
+      educ   == 1 | educ == 2                  ~ "High school\nor less",
+      educ   == 3 | educ == 4                  ~ "Some college", 
+      educ   == 5 | educ == 6                  ~ "Bachelor's degree\nor more",
+      TRUE                                     ~  NA_character_),
+    # Race
+    racecat = fct_case_when(
+      race   == 1                              ~ "White",
+      race   == 2                              ~ "Black", 
+      race   == 3                              ~ "Hispanic",
+      race   >= 4                              ~ "Other", 
+      TRUE                                     ~  NA_character_),
+    # Age
+    age = 2019 - birthyr)   
 
 
 ## Project Variables

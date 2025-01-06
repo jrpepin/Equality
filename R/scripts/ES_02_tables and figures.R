@@ -27,7 +27,9 @@ tabT01 <- data_svy %>%
   add_overall() %>%
   modify_header(
     label = '**Variable**',
-    stat_0 = '**N = 998**') %>%
+    stat_0 ~ "**Overall**, N = {N_unweighted} ({style_percent(p)}%)",     
+    stat_1 ~ "**Men**, N = {n_unweighted} ({style_percent(p)}%)",     
+    stat_2 ~ "**Women**, N = {n_unweighted} ({style_percent(p,digits = 1)}%)") %>%
   as_flex_table() %>%
   add_footer_lines("Source: 2018 YouGov original survey.")
 
@@ -38,7 +40,6 @@ read_docx() %>%
   body_add_par("Table 01. Weighted descriptive statistics of the analytic sample") %>% 
   body_add_flextable(value = tabT01) %>% 
   print(target = file.path(outDir, "ES_tableT01.docx"))
-
 
 
 # Table 02 ---------------------------------------------------------------------
@@ -52,14 +53,23 @@ m1 <- multinom(ideal ~ female + married + parent + educat + racecat + age + atti
 ## 6 categories at same time
 m2 <- multinom(ideal6 ~ female + married + parent + educat + racecat + age + attitudes, data, weights = weight)
 
+## Tidy and Relative Risk Ratios
+m1_tidy <- tidy(m1, conf.int = TRUE, exponentiate = TRUE)
+m2_tidy <- tidy(m2, conf.int = TRUE, exponentiate = TRUE)
+
+m1_tidy %>% 
+  kable() %>% 
+  kable_styling("basic", full_width = FALSE)
+
+
 ### AMEs
 ame_m1 <- avg_slopes(m1, by = "female")
 ame_m2 <- avg_slopes(m2, by = "female")
 
 ## Create list for 2 panels
 panels <- list(
-  "4 categories" = ame_m1,
-  "6 categories" = ame_m2)
+  "4 categories" = m1,
+  "6 categories" = m2)
 
 ## Create pretty labels
 coef_map <- c(

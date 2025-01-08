@@ -57,14 +57,14 @@ m2 <- multinom(ideal6 ~ female + married + parent + educat + racecat + age + att
 m1_tidy <- tidy(m1, conf.int = TRUE, exponentiate = TRUE)
 m2_tidy <- tidy(m2, conf.int = TRUE, exponentiate = TRUE)
 
-m1_tidy %>% 
-  kable() %>% 
-  kable_styling("basic", full_width = FALSE)
+#m1_tidy %>% 
+ # kable() %>% 
+ # kable_styling("basic", full_width = FALSE)
 
 
 ### AMEs
-ame_m1 <- avg_slopes(m1, by = "female")
-ame_m2 <- avg_slopes(m2, by = "female")
+#ame_m1 <- avg_slopes(m1, by = "female")
+#ame_m2 <- avg_slopes(m2, by = "female")
 
 ## Create list for 2 panels
 panels <- list(
@@ -73,33 +73,33 @@ panels <- list(
 
 ## Create pretty labels
 coef_map <- c(
-  "per.1"    = "High Stakes",
-  "per.2"    = "Low Stakes")
+  "femaleWomen"                     = "Women",
+  "marriedMarried"                  = "Married",
+  "parentHH child"                  = "Household child",
+  "educatSome college"              = "Some college",
+  "educatBachelor's degree or more" = "BA or more",
+  "racecatBlack"                    = "Black",
+  "racecatHispanic"                 = "Hispanic",
+  "racecatOther"                    = "Age",
+  "attitudes"                       = "Gender essentialism",
+  "(Intercept)"                     = "Intercept")
 
 ## Produce Table 02
-modelsummary(
+tab02 <- modelsummary(
   panels,
-#  coef_map = coef_map,
-  shape = group + term + contrast ~ model + female,
+  coef_map = coef_map,
+  shape = term + response ~ statistic,
+  exponentiate = TRUE,
   gof_map = NA,
   estimate = "{estimate} ({std.error}) {stars} ",
   statistic = NULL,
   stars = c("*" =.05, "**" = .01, "***" = .001),
-  fmt = fmt_decimal(digits = 3, pdigits = 3),
+  fmt = fmt_decimal(digits = 2, pdigits = 3),
   #  add_rows = rows,
-  output = "huxtable") 
-
-# %>%
-#   insert_row(c("Man Higher Earner",   " ", " ", " "), after = 1)  %>%
-#   insert_row(c("Woman Higher Earner", " ", " ", " "), after = 6)  %>%
-#   insert_row(c("Equal Earners",       " ", " ", " "), after = 11) %>%
-#   insert_row(c('Significant difference, high vs. low stakes?', 
-#                'Yes', 'Yes', 'No'),                   after = 6)  %>%
-#   insert_row(c('Significant difference, high vs. low stakes?', 
-#                'Yes', 'No', 'Yes'),                  after = 12)  %>%
-#   insert_row(c('Significant difference, high vs. low stakes?', 
-#                'No', 'No', 'No'),                    after = 18)  %>%
-#   set_top_border(row = c(8, 14), col = everywhere)                %>%
+  output = "huxtable") %>%
+  insert_row(c("Education (ref = high school or less)", " ", " ", " "), after = 19)  %>%
+  insert_row(c("Race/ethnicity (ref = White)", " ", " ", " "), after = 26)  
+ #  set_top_border(row = c(8, 14), col = everywhere)                %>%
 #   set_bottom_border(row = c(1,8,14), col = everywhere)            %>%
 #   set_align(row = c(3, 5, 9, 11, 15, 17), 1, "center")            %>%
 #   huxtable::as_flextable()                                        %>%
@@ -109,6 +109,12 @@ modelsummary(
 #   set_table_properties(layout = "autofit") 
 # 
 # tab02
+     
+#Rename column names 
+colnames(tab02) <- c(" ", " ", "4 category model", "6 category model")
+
+tab02 <- huxtable::add_colnames(tab02) 
+print(tab02)
 
 # Figure 01 --------------------------------------------------------------------
 

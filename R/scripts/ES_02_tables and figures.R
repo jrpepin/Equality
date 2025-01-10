@@ -7,7 +7,7 @@
 
 # Table 01 Descriptive Statistics of Respondent Characteristics ----------------
 
-tabT01 <- data_svy %>%
+tab01 <- data_svy %>%
   select("female", "married", "parent", 
          "educat", "racecat", "age", "attitudes") %>%
   tbl_svysummary(
@@ -33,13 +33,13 @@ tabT01 <- data_svy %>%
   as_flex_table() %>%
   add_footer_lines("Source: 2018 YouGov original survey.")
 
-tabT01 # show table
+tab01 # show table
 
 ## https://mran.microsoft.com/snapshot/2017-12-11/web/packages/officer/vignettes/word.html
 read_docx() %>% 
   body_add_par("Table 01. Weighted descriptive statistics of the analytic sample") %>% 
-  body_add_flextable(value = tabT01) %>% 
-  print(target = file.path(outDir, "ES_tableT01.docx"))
+  body_add_flextable(value = tab01) %>% 
+  print(target = file.path(outDir, "ES_table01.docx"))
 
 
 # Table 02 ---------------------------------------------------------------------
@@ -54,8 +54,8 @@ m1 <- multinom(ideal ~ female + married + parent + educat + racecat + age + atti
 m2 <- multinom(ideal6 ~ female + married + parent + educat + racecat + age + attitudes, data, weights = weight)
 
 ## Tidy and Relative Risk Ratios
-m1_tidy <- tidy(m1, conf.int = TRUE, exponentiate = TRUE)
-m2_tidy <- tidy(m2, conf.int = TRUE, exponentiate = TRUE)
+#m1_tidy <- tidy(m1, conf.int = TRUE, exponentiate = TRUE)
+#m2_tidy <- tidy(m2, conf.int = TRUE, exponentiate = TRUE)
 
 #m1_tidy %>% 
  # kable() %>% 
@@ -68,26 +68,31 @@ m2_tidy <- tidy(m2, conf.int = TRUE, exponentiate = TRUE)
 
 ## Create list for 2 panels
 panels <- list(
-  "4 categories" = m1,
-  "6 categories" = m2)
+  "4 category model" = m1,
+  "6 category model" = m2)
 
 ## Create pretty labels
-coef_map <- c(
+coef_map1 <- c(
   "femaleWomen"                     = "Women",
+  "attitudes"                       = "Gender essentialism",
+  "(Intercept)"                     = "Intercept")
+
+### Appendix Table
+coef_map2 <- c(
   "marriedMarried"                  = "Married",
   "parentHH child"                  = "Household child",
   "educatSome college"              = "Some college",
-  "educatBachelor's degree or more" = "BA or more",
+  "educatBachelor's degree
+or more"                            = "BA or more",
   "racecatBlack"                    = "Black",
   "racecatHispanic"                 = "Hispanic",
-  "racecatOther"                    = "Age",
-  "attitudes"                       = "Gender essentialism",
-  "(Intercept)"                     = "Intercept")
+  "racecatOther"                    = "Other",
+  "age"                             = "Age")
 
 ## Produce Table 02
 tab02 <- modelsummary(
   panels,
-  coef_map = coef_map,
+  coef_map = coef_map1,
   shape = term + response ~ statistic,
   exponentiate = TRUE,
   gof_map = NA,
@@ -95,26 +100,46 @@ tab02 <- modelsummary(
   statistic = NULL,
   stars = c("*" =.05, "**" = .01, "***" = .001),
   fmt = fmt_decimal(digits = 2, pdigits = 3),
-  #  add_rows = rows,
   output = "huxtable") %>%
-  insert_row(c("Education (ref = high school or less)", " ", " ", " "), after = 19)  %>%
-  insert_row(c("Race/ethnicity (ref = White)", " ", " ", " "), after = 26)  
- #  set_top_border(row = c(8, 14), col = everywhere)                %>%
-#   set_bottom_border(row = c(1,8,14), col = everywhere)            %>%
-#   set_align(row = c(3, 5, 9, 11, 15, 17), 1, "center")            %>%
-#   huxtable::as_flextable()                                        %>%
-#   flextable::footnote(i = 11, j = 1, 
-#                       value = as_paragraph(c("Statistically significant gender difference (p < .05)."))) %>%
-#   add_footer_lines("Notes: N=7,956 person-decisions. 3,970 men and 3,986 women. Results calculated from respondent-fixed effects linear probability models. Independent models applied by relative income and respondent gender. Standard errors in parentheses.") %>%
-#   set_table_properties(layout = "autofit") 
-# 
-# tab02
-     
-#Rename column names 
-colnames(tab02) <- c(" ", " ", "4 category model", "6 category model")
+  huxtable::as_flextable() %>%
+  set_table_properties(layout = "autofit") %>%
+  add_footer_lines("Notes: Standard errors in parentheses. Models include demographic variables (see Appendix Table A).")
 
-tab02 <- huxtable::add_colnames(tab02) 
-print(tab02)
+tab02
+
+read_docx() %>% 
+  body_add_par("Table 02. Multinomial Regression Models (Relative Risk Ratios)") %>% 
+  body_add_flextable(value = tab02) %>% 
+  print(target = file.path(outDir, "ES_table02.docx"))
+
+
+## Produce Appendix Table 01
+tabA01 <- modelsummary(
+  panels,
+  coef_map = coef_map2,
+  shape = term + response ~ statistic,
+  exponentiate = TRUE,
+  gof_map = NA,
+  estimate = "{estimate} ({std.error}) {stars} ",
+  statistic = NULL,
+  stars = c("*" =.05, "**" = .01, "***" = .001),
+  fmt = fmt_decimal(digits = 2, pdigits = 3),
+  output = "huxtable") %>%
+  insert_row(c("Education (ref = high school or less)", " ", " ", " "), 
+             after = 13)  %>%
+  insert_row(c("Race/ethnicity (ref = White)", " ", " ", " "), 
+             after = 26) %>%
+  huxtable::as_flextable() %>%
+  set_table_properties(layout = "autofit") %>%
+  add_footer_lines("Notes: Standard errors in parentheses. Models include gender and gender attitudes (see paper Table 02).")
+
+tabA01
+
+read_docx() %>% 
+  body_add_par("Appendix Table 01. Multinomial Regression Models (Relative Risk Ratios)") %>% 
+  body_add_flextable(value = tabA01) %>% 
+  print(target = file.path(outDir, "ES_tableA01.docx"))
+
 
 # Figure 01 --------------------------------------------------------------------
 

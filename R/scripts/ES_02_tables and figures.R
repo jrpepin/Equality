@@ -73,9 +73,9 @@ panels <- list(
 
 ## Create pretty labels
 coef_map1 <- c(
+  "(Intercept)"                     = "Intercept",
   "femaleWomen"                     = "Women",
-  "attitudes"                       = "Gender essentialism",
-  "(Intercept)"                     = "Intercept")
+  "attitudes"                       = "Gender essentialism")
 
 ### Appendix Table
 coef_map2 <- c(

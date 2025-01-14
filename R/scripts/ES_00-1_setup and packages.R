@@ -51,7 +51,6 @@ sessionInfo()
 conflict_scout() # Identify the conflicts
 conflict_prefer("remove", "base")
 conflict_prefer("here", "here")
-conflict_prefer("as_flextable", "gtsummary")
 
 conflict_prefer("filter",    "dplyr")
 conflict_prefer("mutate",    "dplyr")

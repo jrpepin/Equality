@@ -174,7 +174,15 @@ data_fig1 <- data_fig1 %>%
     female = fct_case_when(
       female == "All" ~ "All",
       female == "Men" ~ "Men",
-      female == "Women" ~ "Women"))
+      female == "Women" ~ "Women"),
+    group = fct_case_when(
+      group == "Self-reliance" ~ "Self-reliance",
+      group == "Provider"      ~ "Provider",
+      group == "Homemaker"     ~ "Homemaker",
+      group == "Sharing"       ~ "Sharing\n(unspecified)",
+      group == "Specialized"   ~ "Specialized\nsharing",
+      group == "Flexible"      ~ "Flexible\nsharing",
+      group == "Even"          ~ "Even\nsharing"))
 
 ## Create fig
 fig1 <- data_fig1 %>%
@@ -236,6 +244,17 @@ invisible(dev.off())
 ## Create predicted probabilities date sets
 data_fig2 <- avg_predictions(m2, variables = list(essentialism_N = c(1,2,3,4,5)))
 
+data_fig2 <- data_fig2 %>%
+  mutate(
+    group = fct_case_when(
+      group == "Self-reliance" ~ "Self-reliance",
+      group == "Provider"      ~ "Provider",
+      group == "Homemaker"     ~ "Homemaker",
+      group == "Sharing"       ~ "Sharing\n(unspecified)",
+      group == "Specialized"   ~ "Specialized\nsharing",
+      group == "Flexible"      ~ "Flexible\nsharing",
+      group == "Even"          ~ "Even\nsharing"))
+
 fig2 <- data_fig2 %>%
   ggplot(aes(x = essentialism_N, y = estimate, ymin=conf.low, ymax=conf.high)) +
   geom_line() +
@@ -281,6 +300,18 @@ invisible(dev.off())
 data_fig3 <- avg_predictions(m2, by = c("female", "essentialism_N"), 
                                 variables = list(essentialism_N = c(1,2,3,4,5)))
 
+data_fig3 <- data_fig3 %>%
+  mutate(
+    group = fct_case_when(
+      group == "Self-reliance" ~ "Self-reliance",
+      group == "Provider"      ~ "Provider",
+      group == "Homemaker"     ~ "Homemaker",
+      group == "Sharing"       ~ "Sharing\n(unspecified)",
+      group == "Specialized"   ~ "Specialized\nsharing",
+      group == "Flexible"      ~ "Flexible\nsharing",
+      group == "Even"          ~ "Even\nsharing"))
+
+
 fig3 <- data_fig3 %>%
   ggplot(aes(y = estimate, x = essentialism_N, fill = female, ymin=conf.low, ymax=conf.high)) +
   geom_col(width = 0.6, position = position_dodge(0.7), colour="black") +
@@ -311,7 +342,10 @@ fig3 <- data_fig3 %>%
     #   caption  = "Note: ZZZ",
     x        = "Gender essentialism", 
     y        = NULL,
-    fill     = NULL) 
+    fill     = NULL)
+#  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf),
+#            data = ~ subset(., group %in% "Even\nsharing"), 
+ #           colour = "black", fill = NA, inherit.aes = FALSE)
 
 fig3
 

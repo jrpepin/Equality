@@ -104,7 +104,7 @@ data <- data %>%
       share=="Flexible"                         ~ "Flexible",
       share=="Equally\nHome Centered"           | 
         share=="Equally\nBalanced"              | 
-        share=="Equally\nCareer-centered"       ~ "Equally",
+        share=="Equally\nCareer-centered"       ~ "Even",
       TRUE                                      ~  NA_character_),
     # Ideal arrangements (6 categories)
     ideal6 = fct_case_when(
@@ -113,7 +113,7 @@ data <- data %>%
       ideal  == "Homemaker"                     ~ "Homemaker",
       share3 == "Specialized"                   ~ "Specialized",
       share3 == "Flexible"                      ~ "Flexible",
-      share3 == "Equally"                       ~ "Equally",
+      share3 == "Even"                          ~ "Even",
       TRUE                                      ~  NA_character_),
     # 1 missing case
     essentialism = na_if(essentialism, 8))
@@ -218,7 +218,7 @@ mutate(across(
 data <- data %>%
   select(caseid, weight, female, married, parent, educat, racecat, age,
          wfaNow, ideal, ideal6, share, share3, 
-         attitudes, essentialism, scarce, menlead, fathers, decisions, time)
+         attitudes, essentialism_N, scarce_N, menlead_N, fathers_N, decisions_N, time_N)
 
 ## Clean up global environment
 remove(scoring_key, p0, scales, alpha_df)

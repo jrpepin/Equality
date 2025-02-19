@@ -9,19 +9,20 @@
 
 tab01 <- data_svy %>%
   select("female", "married", "parent", 
-         "educat", "racecat", "age", "attitudes") %>%
+         "educat", "racecat", "age", "essentialism_N") %>%
   tbl_svysummary(
     by    = female, 
-    label = list(married    ~ "Married",
-                 parent     ~ "Children under age 18 in household",
-                 educat     ~ "Education group",
-                 racecat    ~ "Respondent race/ethnicity",
-                 age        ~ "Respondent age",
-                 attitudes  ~ "Gender essentialism beliefs"),
-    type  = list(married    ~ "dichotomous",
-                 parent     ~ "dichotomous"),
-    value = list(married    = "Married",
-                 parent     = "HH child"),
+    label = list(married         ~ "Married",
+                 parent          ~ "Children under age 18 in household",
+                 educat          ~ "Education group",
+                 racecat         ~ "Respondent race/ethnicity",
+                 age             ~ "Respondent age",
+                 essentialism_N  ~ "Gender essentialism beliefs"),
+    type  = list(married         ~ "dichotomous",
+                 parent          ~ "dichotomous",
+                 essentialism_N  ~ "continuous"),
+    value = list(married         = "Married",
+                 parent          = "HH child"),
     statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{p}"),
     digits = ~ c(2))  %>%
   add_overall() %>%
@@ -37,7 +38,7 @@ tab01 # show table
 
 ## https://mran.microsoft.com/snapshot/2017-12-11/web/packages/officer/vignettes/word.html
 read_docx() %>% 
-  body_add_par("Table 01. Weighted descriptive statistics of the analytic sample") %>% 
+  body_add_par("Table 1. Weighted descriptive statistics of the analytic sample") %>% 
   body_add_flextable(value = tab01) %>% 
   print(target = file.path(outDir, "ES_table01.docx"))
 
@@ -48,10 +49,10 @@ read_docx() %>%
 data$ideal <- relevel(data$ideal, ref = "Self-reliance")
 
 ## Original 4 categories
-m1 <- multinom(ideal ~ female + married + parent + educat + racecat + age + attitudes, data, weights = weight)
+m1 <- multinom(ideal ~ female + married + parent + educat + racecat + age + essentialism_N, data, weights = weight)
 
 ## 6 categories at same time
-m2 <- multinom(ideal6 ~ female + married + parent + educat + racecat + age + attitudes, data, weights = weight)
+m2 <- multinom(ideal6 ~ female + married + parent + educat + racecat + age + essentialism_N, data, weights = weight)
 
 ## Tidy and Relative Risk Ratios
 #m1_tidy <- tidy(m1, conf.int = TRUE, exponentiate = TRUE)
@@ -75,7 +76,7 @@ panels <- list(
 coef_map1 <- c(
   "(Intercept)"                     = "Intercept",
   "femaleWomen"                     = "Women",
-  "attitudes"                       = "Gender essentialism")
+  "essentialism_N"                  = "Gender essentialism")
 
 ### Appendix Table
 coef_map2 <- c(
@@ -108,13 +109,13 @@ tab02 <- modelsummary(
 tab02
 
 read_docx() %>% 
-  body_add_par("Table 02. Multinomial Regression Models (Relative Risk Ratios)") %>% 
+  body_add_par("Table 2. Multinomial Regression Models (Relative Risk Ratios)") %>% 
   body_add_flextable(value = tab02) %>% 
   print(target = file.path(outDir, "ES_table02.docx"))
 
 
 ## Produce Appendix Table 01
-tabA01 <- modelsummary(
+tabA <- modelsummary(
   panels,
   coef_map = coef_map2,
   shape = term + response ~ statistic,
@@ -131,14 +132,14 @@ tabA01 <- modelsummary(
              after = 26) %>%
   huxtable::as_flextable() %>%
   set_table_properties(layout = "autofit") %>%
-  add_footer_lines("Notes: Standard errors in parentheses. Models include gender and gender attitudes (see paper Table 02).")
+  add_footer_lines("Notes: Standard errors in parentheses. Models include gender and gender essentialism (see paper Table 2).")
 
-tabA01
+tabA
 
 read_docx() %>% 
-  body_add_par("Appendix Table 01. Multinomial Regression Models (Relative Risk Ratios)") %>% 
-  body_add_flextable(value = tabA01) %>% 
-  print(target = file.path(outDir, "ES_tableA01.docx"))
+  body_add_par("Appendix Table A. Multinomial Regression Models (Relative Risk Ratios)") %>% 
+  body_add_flextable(value = tabA) %>% 
+  print(target = file.path(outDir, "ES_tableA.docx"))
 
 
 # Figure 01 --------------------------------------------------------------------
@@ -169,7 +170,7 @@ data_fig1 <- data_fig1 %>%
       group == "Sharing"       ~ "even",
       group == "Specialized"   |
         group == "Flexible"    |
-        group == "Equally"     ~ "sub-even"),
+        group == "Even"        ~ "sub-even"),
     female = fct_case_when(
       female == "All" ~ "All",
       female == "Men" ~ "Men",
@@ -210,7 +211,7 @@ fig1 <- data_fig1 %>%
     plot.title.position = "plot") +
   scale_y_continuous(labels=scales::percent, limits = c(0, .75)) +
   scale_x_discrete(limits=rev) +
-  scale_fill_manual(values = c("white", "grey70", "black")) +
+  scale_fill_manual(values = c("grey70", "black", "white" )) +
   coord_flip() +
   guides(fill = guide_legend(reverse = TRUE)) +
   labs(
@@ -233,16 +234,17 @@ invisible(dev.off())
 # Figure 02 --------------------------------------------------------------------
 
 ## Create predicted probabilities date sets
-data_fig2 <- avg_predictions(m2, variables = list(attitudes = c(1,2,3,4,5)))
+data_fig2 <- avg_predictions(m2, variables = list(essentialism_N = c(1,2,3,4,5)))
 
 fig2 <- data_fig2 %>%
-  ggplot(aes(x = attitudes, y = estimate, ymin=conf.low, ymax=conf.high)) +
+  ggplot(aes(x = essentialism_N, y = estimate, ymin=conf.low, ymax=conf.high)) +
   geom_line() +
   geom_errorbar(width = 0.2, color="grey40") +
   geom_point() +
   facet_wrap("group", ncol = 3) +
   theme_minimal() +
   scale_x_reverse() +
+  ylim(0, 0.5) +
   theme(
     text                = element_text(size=12, family = "serif"),
     axis.text           = element_text(size=12, family = "serif"), 
@@ -276,19 +278,62 @@ invisible(dev.off())
 # Figure 03 --------------------------------------------------------------------
 
 ## Create predicted probabilities date sets (for reference)
-data_fig3_pp <- avg_predictions(m2, by = c("female", "attitudes"), 
-                                variables = list(attitudes = c(1,2,3,4,5)))
-
-## Create AMEs
-data_fig3    <- avg_slopes(m2, by = c("attitudes"), variables = "female", 
-                           newdata = datagrid(attitudes = c(1,2,3,4,5), 
-                                              grid_type = "counterfactual"))
+data_fig3 <- avg_predictions(m2, by = c("female", "essentialism_N"), 
+                                variables = list(essentialism_N = c(1,2,3,4,5)))
 
 fig3 <- data_fig3 %>%
-  ggplot(aes(y = estimate, x = attitudes, ymin=conf.low, ymax=conf.high)) +
+  ggplot(aes(y = estimate, x = essentialism_N, fill = female, ymin=conf.low, ymax=conf.high)) +
+  geom_col(width = 0.6, position = position_dodge(0.7), colour="black") +
+  geom_errorbar(width = 0.2, position = position_dodge(0.7), color="#707070") +
+  facet_wrap("group", ncol = 3) +
+  theme_minimal() +
+  scale_x_reverse() +
+  theme(
+    text                = element_text(size=12, family = "serif"),
+    axis.text           = element_text(size=12, family = "serif"), 
+    legend.text         = element_text(size=12, family = "serif"),
+    legend.position     = "bottom",
+    panel.grid.minor    = element_blank(),
+    panel.grid.major.x  = element_blank(),
+    axis.line           = element_line(), 
+    strip.text          = element_text(face = "bold",    size=12, family = "serif"),
+    axis.text.y         = element_text(colour = "black", size=12, family = "serif"),
+    axis.text.x         = element_text(colour = "black", size=12, family = "serif"),
+    axis.ticks.y        = element_blank(),  #remove y axis ticks
+    plot.subtitle       = element_text(face = "italic", color = "#707070"),
+    plot.caption        = element_text(face = "italic", color = "#707070"),
+    plot.title          = ggtext::element_markdown(),
+    plot.title.position = "plot") +
+  scale_fill_manual(values = c("black", "grey70")) +
+  labs(
+    #   title    = "XXX",
+    #   subtitle = "YYY",
+    #   caption  = "Note: ZZZ",
+    x        = "Gender essentialism", 
+    y        = NULL,
+    fill     = NULL) 
+
+fig3
+
+## save Figure 3
+agg_tiff(filename = file.path(here(outDir, figDir), "fig3.tif"), 
+         width=6.5, height=5, units="in", res = 800, scaling = 1)
+plot(fig3)
+invisible(dev.off())
+
+
+## AMEs (For reference) --------------------------------------------------------
+
+## Create AMEs
+data_fig3_AME    <- avg_slopes(m2, by = c("essentialism_N"), variables = "female", 
+                           newdata = datagrid(essentialism_N = c(1,2,3,4,5), 
+                                              grid_type = "counterfactual"))
+
+data_fig3_AME %>%
+  ggplot(aes(y = estimate, x = essentialism_N, ymin=conf.low, ymax=conf.high)) +
   geom_col(width = 0.6, position = position_dodge(0.7), colour="black") +
   geom_errorbar(width = 0.2, position = position_dodge(0.7), color="grey70") +
-  geom_hline(yintercept=0, size=1) +
+  geom_hline(yintercept=0, linewidth=1) +
   facet_wrap("group", ncol = 3) +
   theme_minimal() +
   theme(
@@ -313,12 +358,3 @@ fig3 <- data_fig3 %>%
     #   caption  = "Note: ZZZ",
     x        = "Gender essentialism", 
     y        = NULL) 
-
-fig3
-
-## save Figure 3
-agg_tiff(filename = file.path(here(outDir, figDir), "fig3.tif"), 
-         width=6.5, height=5, units="in", res = 800, scaling = 1)
-plot(fig3)
-invisible(dev.off())
-

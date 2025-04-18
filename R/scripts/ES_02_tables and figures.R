@@ -9,7 +9,7 @@
 
 tab01 <- data_svy %>%
   select("female", "married", "parent", 
-         "educat", "racecat", "age", "essentialism_N") %>%
+         "educat", "racecat", "age") %>%
   tbl_svysummary(
     by    = female, 
     label = list(married         ~ "Married",
@@ -44,6 +44,35 @@ read_docx() %>%
 
 
 # Table 02 ---------------------------------------------------------------------
+
+tab02 <- data_svy %>%
+  select("female", "ideal", "ideal6", "essentialism_N") %>%
+  tbl_svysummary(
+    by    = female, 
+    label = list(ideal           ~ "4-category work-family arrangement",
+                 ideal6          ~ "6-category work-family arrangement",
+                 essentialism_N  ~ "Gender essentialism beliefs"),
+    type  = list(essentialism_N  ~ "continuous"),
+    statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{p}"),
+    digits = ~ c(2))  %>%
+  add_overall() %>%
+  modify_header(
+    label = '**Variable**',
+    stat_0 ~ "**Overall**, N = {N_unweighted} ({style_percent(p)}%)",     
+    stat_1 ~ "**Men**, N = {n_unweighted} ({style_percent(p)}%)",     
+    stat_2 ~ "**Women**, N = {n_unweighted} ({style_percent(p,digits = 1)}%)") %>%
+  as_flex_table() %>%
+  add_footer_lines("Source: 2018 YouGov original survey.")
+
+tab02 # show table
+
+## https://mran.microsoft.com/snapshot/2017-12-11/web/packages/officer/vignettes/word.html
+read_docx() %>% 
+  body_add_par("Table 2. Weighted bivariate statistics") %>% 
+  body_add_flextable(value = tab02) %>% 
+  print(target = file.path(outDir, "ES_table02.docx"))
+
+# Table 03 ---------------------------------------------------------------------
 
 ## Set reference levels
 data$ideal <- relevel(data$ideal, ref = "Self-reliance")
@@ -90,8 +119,8 @@ or more"                            = "BA or more",
   "racecatOther"                    = "Other",
   "age"                             = "Age")
 
-## Produce Table 02
-tab02 <- modelsummary(
+## Produce Table 03
+tab03 <- modelsummary(
   panels,
   coef_map = coef_map1,
   shape = term + response ~ statistic,
@@ -106,12 +135,12 @@ tab02 <- modelsummary(
   set_table_properties(layout = "autofit") %>%
   add_footer_lines("Notes: Standard errors in parentheses. Models include demographic variables (see Appendix Table A).")
 
-tab02
+tab03
 
 read_docx() %>% 
-  body_add_par("Table 2. Multinomial Regression Models (Relative Risk Ratios)") %>% 
-  body_add_flextable(value = tab02) %>% 
-  print(target = file.path(outDir, "ES_table02.docx"))
+  body_add_par("Table 3. Multinomial Regression Models (Relative Risk Ratios)") %>% 
+  body_add_flextable(value = tab03) %>% 
+  print(target = file.path(outDir, "ES_table03.docx"))
 
 
 ## Produce Appendix Table 01

@@ -16,11 +16,9 @@ tab01 <- data_svy %>%
                  parent          ~ "Children under age 18 in household",
                  educat          ~ "Education group",
                  racecat         ~ "Respondent race/ethnicity",
-                 age             ~ "Respondent age",
-                 essentialism_N  ~ "Gender essentialism beliefs"),
+                 age             ~ "Respondent age"),
     type  = list(married         ~ "dichotomous",
-                 parent          ~ "dichotomous",
-                 essentialism_N  ~ "continuous"),
+                 parent          ~ "dichotomous"),
     value = list(married         = "Married",
                  parent          = "HH child"),
     statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{p}"),
@@ -41,6 +39,11 @@ read_docx() %>%
   body_add_par("Table 1. Weighted descriptive statistics of the analytic sample") %>% 
   body_add_flextable(value = tab01) %>% 
   print(target = file.path(outDir, "ES_table01.docx"))
+
+### Cell sizes
+
+xtabs(~ female + married + parent, data = data)
+
 
 
 # Table 02 ---------------------------------------------------------------------

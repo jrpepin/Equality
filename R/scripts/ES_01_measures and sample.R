@@ -17,7 +17,7 @@ data <- data %>%
   # Create an ID variable
   mutate(ID = row_number()) %>%
   select(caseid, weight,                              # Survey variables
-         gender, birthyr, race, educ,                # Demographic     
+         gender, birthyr, race, educ, employ,         # Demographic     
          marstat, child18,
          division_of_labor, ideal_arrangement,        # Project specific
          future, future_sharing, 
@@ -44,6 +44,11 @@ data <- data %>%
       marstat!=1 & marstat != 6                ~ "Not married", 
       marstat==1 | marstat == 6                ~ "Married",
       TRUE                                     ~  NA_character_),
+    # Ever married
+    evermar = fct_case_when(
+      marstat != 5                             ~ "Yes, ever married",
+      marstat == 5                             ~ "Never married",
+      TRUE                                     ~  NA_character_),
     # Children under age 18 in household
     parent = fct_case_when(
       child18==2                               ~ "No HH child",
@@ -55,6 +60,11 @@ data <- data %>%
       educ   == 3 | educ == 4                  ~ "Some college", 
       educ   == 5 | educ == 6                  ~ "Bachelor's degree\nor more",
       TRUE                                     ~  NA_character_),
+    # Employment
+    fulltime = fct_case_when(
+      employ == 1                              ~ "Full-time",
+      employ != 1                              ~ "Not fulltime",
+      TRUE                                     ~  NA_character_),
     # Race
     racecat = fct_case_when(
       race   == 1                              ~ "White",
@@ -63,16 +73,24 @@ data <- data %>%
       race   >= 4                              ~ "Other", 
       TRUE                                     ~  NA_character_),
     # Age
-    age = 2019 - birthyr)   
+    age  = 2019 - birthyr,
+    age2 = age^2)   
 
 
 ## Project Variables
 data <- data %>%
   mutate(
-    # Current work-family arrangement
+    # Current work-family arrangement (dum)
     wfaNow = fct_case_when(
       division_of_labor   == 1                  ~ "No WFA",
       division_of_labor   >= 2 & 
+        division_of_labor <= 5                  ~ "WFA",
+      TRUE                                      ~  NA_character_),
+    # 3 cat current work-family arrangement
+    wfa3Now = fct_case_when(
+      division_of_labor   == 1                  ~ "No WFA",
+      division_of_labor   == 2                  ~ "Independence",
+      division_of_labor   >= 3 & 
         division_of_labor <= 5                  ~ "WFA",
       TRUE                                      ~  NA_character_),
     # Ideal work-family arrangement
@@ -217,6 +235,7 @@ mutate(across(
 # Keep processed project variables ---------------------------------------------
 data <- data %>%
   select(caseid, weight, female, married, parent, educat, racecat, age,
+         age2, fulltime, wfa3Now, evermar,
          wfaNow, ideal, ideal6, share, share3, 
          attitudes, essentialism_N, scarce_N, menlead_N, fathers_N, decisions_N, time_N)
 

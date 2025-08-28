@@ -60,6 +60,11 @@ data <- data %>%
       educ   == 3 | educ == 4                  ~ "Some college", 
       educ   == 5 | educ == 6                  ~ "Bachelor's degree\nor more",
       TRUE                                     ~  NA_character_),
+    # Education dum
+    edu_d = fct_case_when(
+      educ   >= 1 & educ <= 4                  ~ "No college degree", 
+      educ   == 5 | educ == 6                  ~ "Bachelor's degree\nor more",
+      TRUE                                     ~  NA_character_),
     # Employment
     fulltime = fct_case_when(
       employ == 1                              ~ "Full-time",
@@ -100,6 +105,13 @@ data <- data %>%
       ideal_arrangement==3  | future == 3       ~ "Homemaker",
       ideal_arrangement==4  | future == 4       ~ "Sharing",
       TRUE                                      ~  NA_character_),
+    # Ideal 3-work-family arrangement
+    ideal_3 = fct_case_when(
+      ideal_arrangement==1  | future == 1       ~ "Self-reliance",
+      ideal_arrangement==2  | future == 2       |
+      ideal_arrangement==3  | future == 3       ~ "Provider/Homemaker",
+      ideal_arrangement==4  | future == 4       ~ "Sharing",
+      TRUE                                      ~  NA_character_),
     # Ideal sharing arrangement
     share = fct_case_when(
       future_sharing==1 | 
@@ -131,6 +143,15 @@ data <- data %>%
       ideal  == "Homemaker"                     ~ "Homemaker",
       share3 == "Specialized"                   ~ "Specialized",
       share3 == "Flexible"                      ~ "Flexible",
+      share3 == "Even"                          ~ "Even",
+      TRUE                                      ~  NA_character_),
+    # Ideal arrangements (4 categories)
+    ideal_4 = fct_case_when(
+      ideal  == "Self-reliance"                 ~ "Self-reliance",
+      ideal  == "Provider"                      |
+      ideal  == "Homemaker"                     ~ "Provider/Homemaker",
+      share3 == "Specialized"                   |
+      share3 == "Flexible"                      ~ "Specialized/Flexible",
       share3 == "Even"                          ~ "Even",
       TRUE                                      ~  NA_character_),
     # 1 missing case
@@ -234,9 +255,9 @@ mutate(across(
 
 # Keep processed project variables ---------------------------------------------
 data <- data %>%
-  select(caseid, weight, female, married, parent, educat, racecat, age,
+  select(caseid, weight, female, married, parent, educat, edu_d, racecat, age,
          age2, fulltime, wfa3Now, evermar,
-         wfaNow, ideal, ideal6, share, share3, 
+         wfaNow, ideal, ideal6, share, share3, ideal_3, ideal_4,
          attitudes, essentialism_N, scarce_N, menlead_N, fathers_N, decisions_N, time_N)
 
 ## Clean up global environment

@@ -10,6 +10,8 @@
 # install.packages("pacman")       # Install pacman package if not installed
 library("pacman")                  # Load pacman package
 
+# remotes::install_github("ddsjoberg/gtsummary")
+
 # Install packages not yet installed & load them
 pacman::p_load(
   here,            # relative file paths
@@ -39,11 +41,9 @@ pacman::p_load(
   pandoc,          # word docs from modelsummary
   weights,         # drop leading 0 in geom_text labels
   ragg,            # output figures without blur
+  gtsummary,       # tables with unweighted Ns
   conflicted
 )
-
-# remotes::install_github("ddsjoberg/gtsummary")
-library(gtsummary) # tables with unweighted Ns
 
 sessionInfo()
 
@@ -52,6 +52,7 @@ conflict_scout() # Identify the conflicts
 conflict_prefer("remove", "base")
 conflict_prefer("here", "here")
 
+conflict_prefer_all("dplyr", losers = NULL, quiet = FALSE)
 conflict_prefer("filter",    "dplyr")
 conflict_prefer("mutate",    "dplyr")
 conflict_prefer("summarise", "dplyr")
@@ -60,7 +61,13 @@ conflict_prefer("count",     "dplyr")
 conflict_prefer("rename",    "dplyr")
 conflict_prefer("arrange",   "dplyr")
 conflict_prefer("desc",      "dplyr")
+conflicts_prefer("add_rownames", "dplyr")
 conflict_prefer("select",    "gtsummary")
+conflicts_prefer("align", "flextable")
+conflicts_prefer("alpha", "psych")
+conflicts_prefer("ar", "brms")
+conflicts_prefer("as_flextable", "flextable")
+detach("package:conflicted", unload = TRUE)
 
 ################################################################################
 # Functions

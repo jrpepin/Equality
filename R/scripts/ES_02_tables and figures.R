@@ -44,7 +44,8 @@ read_docx() %>%
 
 xtabs(~ female + married + parent, data = data)
 
-
+cell_counts <- xtabs(~ ideal_3 + female + married + parent, data = data)
+which(cell_counts < 5, arr.ind = TRUE)
 
 # Table 02 ---------------------------------------------------------------------
 

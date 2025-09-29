@@ -41,33 +41,34 @@ pacman::p_load(
   pandoc,          # word docs from modelsummary
   weights,         # drop leading 0 in geom_text labels
   ragg,            # output figures without blur
-  gtsummary,       # tables with unweighted Ns
-  conflicted
+  gtsummary        # tables with unweighted Ns
 )
+
+library(conflicted)
 
 sessionInfo()
 
 # Address any conflicts in the packages
 conflict_scout() # Identify the conflicts
-conflict_prefer("remove", "base")
-conflict_prefer("here", "here")
 
-conflict_prefer_all("dplyr", losers = NULL, quiet = FALSE)
-conflict_prefer("filter",    "dplyr")
-conflict_prefer("mutate",    "dplyr")
-conflict_prefer("summarise", "dplyr")
-conflict_prefer("summarize", "dplyr")
-conflict_prefer("count",     "dplyr")
-conflict_prefer("rename",    "dplyr")
-conflict_prefer("arrange",   "dplyr")
-conflict_prefer("desc",      "dplyr")
-conflicts_prefer("add_rownames", "dplyr")
-conflict_prefer("select",    "gtsummary")
-conflicts_prefer("align", "flextable")
-conflicts_prefer("alpha", "psych")
-conflicts_prefer("ar", "brms")
-conflicts_prefer("as_flextable", "flextable")
-detach("package:conflicted", unload = TRUE)
+conflicts_prefer(base::remove())
+conflicts_prefer(here::here())
+
+
+conflicts_prefer(dplyr::filter())
+conflicts_prefer(dplyr::mutate())
+conflicts_prefer(dplyr::summarise())
+conflicts_prefer(dplyr::summarize())
+conflicts_prefer(dplyr::count())
+conflicts_prefer(dplyr::rename())
+conflicts_prefer(dplyr::arrange())
+conflicts_prefer(dplyr::desc())
+conflicts_prefer(dplyr::add_rownames())
+conflicts_prefer(gtsummary::select())
+conflicts_prefer(flextable::align())
+conflicts_prefer(psych::alpha())
+conflicts_prefer(brms::ar())
+conflicts_prefer(flextable::as_flextable())
 
 ################################################################################
 # Functions

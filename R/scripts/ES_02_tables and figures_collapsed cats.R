@@ -81,12 +81,15 @@ read_docx() %>%
 
 ## Set reference levels
 data$ideal <- relevel(data$ideal, ref = "Self-reliance")
+data$ideal_3 <- relevel(data$ideal_3, ref = "Self-reliance")
 
 ## Original 4 categories
 m1 <- multinom(ideal ~ female + married + parent + educat + racecat + age + essentialism_N, data, weights = weight)
+m1_new <- multinom(ideal_3 ~ female + married + parent + educat + racecat + age + essentialism_N, data, weights = weight)
 
 ## 6 categories at same time
 m2 <- multinom(ideal6 ~ female + married + parent + educat + racecat + age + essentialism_N, data, weights = weight)
+m2_new <- multinom(ideal_4 ~ female + married + parent + educat + racecat + age + essentialism_N, data, weights = weight)
 
 ## Tidy and Relative Risk Ratios
 #m1_tidy <- tidy(m1, conf.int = TRUE, exponentiate = TRUE)
@@ -103,8 +106,8 @@ m2 <- multinom(ideal6 ~ female + married + parent + educat + racecat + age + ess
 
 ## Create list for 2 panels
 panels <- list(
-  "4 category model" = m1,
-  "6 category model" = m2)
+  "3 category model" = m1_new,
+  "4 category model" = m2_new)
 
 ## Create pretty labels
 coef_map1 <- c(
@@ -179,15 +182,15 @@ read_docx() %>%
 # Figure 01 --------------------------------------------------------------------
 
 ## Create predicted probabilities date sets
-pp1        <- avg_predictions(m1)
-pp1G       <- avg_predictions(m1, by = c("female"))
-pp1$model  <- "4 work-family arrangements"
-pp1G$model <- "4 work-family arrangements"
+pp1        <- avg_predictions(m1_new)
+pp1G       <- avg_predictions(m1_new, by = c("female"))
+pp1$model  <- "3 work-family arrangements"
+pp1G$model <- "3 work-family arrangements"
 pp1$female <- "All"
 
 ## Create predicted probabilities date sets
-pp2        <- avg_predictions(m2)
-pp2G       <- avg_predictions(m2, by = c("female"))
+pp2        <- avg_predictions(m2_new)
+pp2G       <- avg_predictions(m2_new, by = c("female"))
 pp2$model  <- "Subset of\n'sharing' arrangement"
 pp2G$model <- "Subset of\n'sharing' arrangement"
 pp2$female <- "All"
@@ -199,11 +202,9 @@ data_fig1 <- data_fig1 %>%
   mutate(
     even = fct_case_when(
       group == "Self-reliance" | 
-        group == "Provider"    | 
-        group == "Homemaker"   ~ "uneven",
+        group == " Provider/Homemaker"   ~ "uneven",
       group == "Sharing"       ~ "even",
-      group == "Specialized"   |
-        group == "Flexible"    |
+      group == "Specialized/Flexible"  |
         group == "Even"        ~ "sub-even"),
     female = fct_case_when(
       female == "All" ~ "All",
@@ -211,17 +212,15 @@ data_fig1 <- data_fig1 %>%
       female == "Women" ~ "Women"),
     group = fct_case_when(
       group == "Self-reliance" ~ "Self-reliance",
-      group == "Provider"      ~ "Provider",
-      group == "Homemaker"     ~ "Homemaker",
+      group == "Provider/Homemaker"      ~ "Provider/Homemaker",
       group == "Sharing"       ~ "Sharing\n(unspecified)",
-      group == "Specialized"   ~ "Specialized\nsharing",
-      group == "Flexible"      ~ "Flexible\nsharing",
+      group == "Specialized/Flexible"   ~ "Specialized/Flexible\nsharing",
       group == "Even"          ~ "Even\nsharing"))
 
 ## Create fig
 fig1 <- data_fig1 %>%
   filter(
-    model == "4 work-family arrangements" |
+    model == "3 work-family arrangements" |
       model == "Subset of\n'sharing' arrangement" & even == "sub-even") %>%
   ggplot(aes(y = estimate, x = group, fill = fct_rev(female), ymin=conf.low, ymax=conf.high)) +
   geom_col(width = 0.6, position = position_dodge(0.7), colour="black") +
@@ -276,17 +275,14 @@ invisible(dev.off())
 # Figure 02 --------------------------------------------------------------------
 
 ## Create predicted probabilities date sets
-data_fig2 <- avg_predictions(m2, variables = list(essentialism_N = c(1,2,3,4,5)))
+data_fig2 <- avg_predictions(m2_new, variables = list(essentialism_N = c(1,2,3,4,5)))
 
 data_fig2 <- data_fig2 %>%
   mutate(
     group = fct_case_when(
       group == "Self-reliance" ~ "Self-reliance",
-      group == "Provider"      ~ "Provider",
-      group == "Homemaker"     ~ "Homemaker",
-      group == "Sharing"       ~ "Sharing\n(unspecified)",
-      group == "Specialized"   ~ "Specialized\nsharing",
-      group == "Flexible"      ~ "Flexible\nsharing",
+      group == "Provider/Homemaker"      ~ "Provider/Homemaker",
+      group == "Specialized/Flexible"   ~ "Specialized/Flexible\nsharing",
       group == "Even"          ~ "Even\nsharing"))
 
 fig2 <- data_fig2 %>%
@@ -294,7 +290,7 @@ fig2 <- data_fig2 %>%
   geom_line() +
   geom_errorbar(width = 0.2, color="grey40") +
   geom_point() +
-  facet_wrap("group", ncol = 3) +
+  facet_wrap("group", ncol = 2) +
   theme_minimal() +
   scale_x_reverse() +
   ylim(0, 0.5) +
